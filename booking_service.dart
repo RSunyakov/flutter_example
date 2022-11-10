@@ -1,5 +1,4 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:teremok/core/utils/stream_subscriber.dart';
 import 'package:teremok/data/dto/booking/booking_create_body.dart';
@@ -36,12 +35,14 @@ class BookingService extends GetxService with StreamSubscriberMixin {
       const BookingDates(reserve: [], userReserve: [], minDays: 0).obsDeco();
 
   final arguments = BookingArguments(
-    placeId: -1,
-    details: DetailedHousing.empty,
-    startDate: DateTime.now(),
-    endDate: DateTime.now(),
-    beds: [],
-  ).obsDeco();
+          placeId: -1,
+          details: DetailedHousing.empty,
+          startDate: DateTime.now(),
+          endDate: DateTime.now(),
+          beds: [],
+          adults: 1,
+          child: 0)
+      .obsDeco();
 
   @override
   void onReady() {
@@ -139,11 +140,9 @@ class BookingService extends GetxService with StreamSubscriberMixin {
 
   void createBooking() {
     final bedsIds = <int>[];
-    final map = <String, int>{};
     for (var value in bedMap.value.keys) {
       if (value.bedId != null) {
         bedsIds.add(value.bedId!);
-        map["bed_ids[]"] = value.bedId!;
       }
     }
     final body = BookingCreateBody(
@@ -152,9 +151,8 @@ class BookingService extends GetxService with StreamSubscriberMixin {
         children: childCount.value,
         dateTo: endDate.value.stringFromDateTime,
         dateFrom: startDate.value.stringFromDateTime,
-        /*bedIds: bedsIds.isEmpty ? null : bedsIds*/);
-    debugPrint('map: ${map.toString()}');
-    _bloc.add(BookingEvent.create(body: body, queries: map.isEmpty ? null : map));
+        bedIds: bedsIds.isEmpty ? null : bedsIds);
+    _bloc.add(BookingEvent.create(body: body));
   }
 
   void getDates() {
@@ -179,5 +177,7 @@ class BookingService extends GetxService with StreamSubscriberMixin {
     }
     startDate.value = arguments.value.startDate;
     endDate.value = arguments.value.endDate;
+    adultCount.value = arguments.value.adults;
+    childCount.value = arguments.value.child;
   }
 }
